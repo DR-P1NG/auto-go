@@ -1,6 +1,6 @@
 //www.elegoo.com
 #include <Servo.h>
-#include <pitches.h>
+#include <adafruit_NeoPixel.h>
 Servo ulserv;
 Servo ulserv2;
 Servo ulserv3;
@@ -24,7 +24,6 @@ Servo ulservU;
 #define ENA 6
 
 
-
 //define Ultrasonic Sensor
 const int trigPin = A5;
 const int echoPin = A4;
@@ -33,11 +32,11 @@ const int echoPin2 = A3;
 const int trigPin3 = A0;
 const int echoPin3 = A1;
 const int laserPin = 4;
+int ledPin = 10;
 int laserPos = 100;
 int distance;
 int distance2;
 int distance3;
-int speed=60 ;  //higher value, slower notes
 
 float duration;
 
@@ -51,7 +50,7 @@ void forward(){
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(100);
+  ulservU.write(110);
   Serial.println("Forward");  //send message to serial monitor
 }
 
@@ -65,7 +64,7 @@ void back(){
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(100);
+  ulservU.write(110);
   Serial.println("Backward"); //send message to serial monitor
 }
 
@@ -82,7 +81,7 @@ void left(){
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(100);
+  ulservU.write(110);
   Serial.println("Left");    //send message to serial monitor
 }
 
@@ -98,7 +97,7 @@ void right(){
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(100);
+  ulservU.write(110);
   Serial.println("Right");   //send message to serial monitor
 }
 
@@ -112,7 +111,7 @@ void stop() {
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(100);
+  ulservU.write(110);
   Serial.println("Stop");    //send message to serial monitor
 }
 
@@ -170,55 +169,20 @@ void rightServo() {
 void bottomServo() {
   digitalWrite(laserPin, HIGH); 
   ulservU.write(90);
-   for (laserPos = 100; laserPos >= 30; laserPos -= 1) {  
+   for (laserPos = 110; laserPos >= 40; laserPos -= 1) {  
       ulservU.write(laserPos);            
       delay(10);   
    }
-   for (laserPos = 30; laserPos <= 170; laserPos += 1) {  
+   for (laserPos = 40; laserPos <= 180; laserPos += 1) {  
       ulservU.write(laserPos);            
       delay(10);   
    }
-   for (laserPos = 170; laserPos >= 100; laserPos -= 1) {  
+   for (laserPos = 180; laserPos >= 110; laserPos -= 1) {  
       ulservU.write(laserPos);            
       delay(10);   
    }
   digitalWrite(laserPin, LOW);              
 }
-
-int melody[] = {
-  NOTE_D4, NOTONE, NOTE_D4, NOTONE, NOTE_D4, NOTONE, NOTE_D4, NOTONE, 
-  NOTE_D4, NOTE_DS4, NOTE_G4, NOTE_D4, NOTONE, NOTE_D4, NOTONE,
-  NOTE_D4, NOTE_DS4, NOTE_G4, NOTE_D4, NOTONE, NOTE_D4, NOTONE,
-  NOTE_D4, NOTE_DS4, NOTE_G4, NOTE_D4, NOTONE, NOTE_D4, NOTONE,
-  NOTE_D4, NOTE_DS4, NOTE_G4, NOTE_A4, NOTONE, NOTE_A4, NOTONE,
-  
-  NOTE_C5, NOTE_AS4, NOTE_A4, NOTE_G4, NOTONE, NOTE_G4, NOTONE,
-  NOTE_C5, NOTE_AS4, NOTE_A4, NOTE_G4, NOTONE, NOTE_G4, NOTONE,
-  
-  NOTE_D4, NOTE_DS4, NOTE_G4, NOTE_D4, NOTONE, NOTE_D4, NOTONE,
-  NOTE_D4, NOTE_DS4, NOTE_G4, NOTE_D4, NOTONE, NOTE_D4, NOTONE,
-  
-  END
-};
-
-int noteDurations[] = {
-  4, 4, 4, 4, 4, 4, 4, 4,
-  6, 6, 4, 4, 4, 4, 4,
-  6, 6, 4, 4, 4, 4, 4,
-  6, 6, 4, 4, 4, 4, 4,
-  6, 6, 4, 4, 4, 4, 4,
-  
-  6, 6, 4, 4, 4, 4, 4,
-  6, 6, 4, 4, 4, 4, 4,
-
-  
-  6, 6, 4, 4, 4, 4, 4,
-  6, 6, 4, 4, 4, 4, 4,
-  20
-};
-int currentMS;
-int nextMS;
-int thisNote = 0;
 
 void setup() {
   pinMode(trigPin, OUTPUT);
@@ -228,6 +192,7 @@ void setup() {
   pinMode(trigPin3, OUTPUT);
   pinMode(echoPin3, INPUT);
   pinMode(laserPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
   pinMode(IN1, OUTPUT);   //before useing io pin, pin mode must be set first 
   pinMode(IN2, OUTPUT);
   pinMode(IN3, OUTPUT);
@@ -238,32 +203,13 @@ void setup() {
   ulserv2.attach(13); 
   ulserv3.attach(12);  
   ulservU.attach(2);
-  digitalWrite(laserPin, LOW);        
-  Serial.begin(9600);     //open serial and set the baudrate 
-  currentMS = millis();
-  nextMS = millis() + speed*noteDurations[thisNote]
-    
-                        
+  digitalWrite(laserPin, LOW);      
+  digitalWrite(ledPin, HIGH);     
+  Serial.begin(9600);     //open serial and set the baudrate             
 }
 
 
-void loop() {
-  int noteDuration = speed*noteDurations[thisNote];
-  
-  if (melody[thisNote] == NOTONE) {
-    noTone(10);
-  } else {
-    tone(10, melody[thisNote]);//,noteDuration*.95);
-  }
-
-  if (millis() >= nextMS) {
-    thisNote++;
-    int nextDuration = speed*noteDurations[thisNote];
-    nextMS += nextDuration;
-  }
-  
-  
-  
+void loop() {  
   distance = acquireDistance();
   distance2 = acquireDistance2();
   distance3 = acquireDistance3();
