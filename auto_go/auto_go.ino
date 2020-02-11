@@ -1,6 +1,5 @@
 //www.elegoo.com
 #include <Servo.h>
-#include <adafruit_NeoPixel.h>
 Servo ulserv;
 Servo ulserv2;
 Servo ulserv3;
@@ -31,9 +30,6 @@ const int trigPin2 = A2;
 const int echoPin2 = A3;
 const int trigPin3 = A0;
 const int echoPin3 = A1;
-const int laserPin = 4;
-int ledPin = 10;
-int laserPos = 100;
 int distance;
 int distance2;
 int distance3;
@@ -50,7 +46,6 @@ void forward(){
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(110);
   Serial.println("Forward");  //send message to serial monitor
 }
 
@@ -64,7 +59,6 @@ void back(){
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(110);
   Serial.println("Backward"); //send message to serial monitor
 }
 
@@ -81,7 +75,6 @@ void left(){
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(110);
   Serial.println("Left");    //send message to serial monitor
 }
 
@@ -97,7 +90,6 @@ void right(){
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(110);
   Serial.println("Right");   //send message to serial monitor
 }
 
@@ -111,7 +103,6 @@ void stop() {
   ulserv.write(60);
   ulserv2.write(80);
   ulserv3.write(100);
-  ulservU.write(110);
   Serial.println("Stop");    //send message to serial monitor
 }
 
@@ -166,24 +157,6 @@ void rightServo() {
   return;
 }
 
-void bottomServo() {
-  digitalWrite(laserPin, HIGH); 
-  ulservU.write(90);
-   for (laserPos = 110; laserPos >= 40; laserPos -= 1) {  
-      ulservU.write(laserPos);            
-      delay(10);   
-   }
-   for (laserPos = 40; laserPos <= 180; laserPos += 1) {  
-      ulservU.write(laserPos);            
-      delay(10);   
-   }
-   for (laserPos = 180; laserPos >= 110; laserPos -= 1) {  
-      ulservU.write(laserPos);            
-      delay(10);   
-   }
-  digitalWrite(laserPin, LOW);              
-}
-
 void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
@@ -191,8 +164,6 @@ void setup() {
   pinMode(echoPin2, INPUT);
   pinMode(trigPin3, OUTPUT);
   pinMode(echoPin3, INPUT);
-  pinMode(laserPin, OUTPUT);
-  pinMode(ledPin, OUTPUT);
   pinMode(IN1, OUTPUT);   //before useing io pin, pin mode must be set first 
   pinMode(IN2, OUTPUT);
   pinMode(IN3, OUTPUT);
@@ -201,10 +172,7 @@ void setup() {
   pinMode(ENB, OUTPUT);
   ulserv.attach(3);   
   ulserv2.attach(13); 
-  ulserv3.attach(12);  
-  ulservU.attach(2);
-  digitalWrite(laserPin, LOW);      
-  digitalWrite(ledPin, HIGH);     
+  ulserv3.attach(12);      
   Serial.begin(9600);     //open serial and set the baudrate             
 }
 
@@ -223,12 +191,10 @@ void loop() {
     delay(500);
     rightServo();
     delay(500);
-    bottomServo();
     if (distance2 > distance3) {
       while (distance < 45) {
         distance = acquireDistance();
         delay(1);
-        Serial.print("Hi: ");
         Serial.print(distance);
         right();
         delay(5);
